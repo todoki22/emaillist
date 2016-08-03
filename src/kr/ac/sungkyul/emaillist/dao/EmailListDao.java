@@ -2,6 +2,7 @@ package kr.ac.sungkyul.emaillist.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,6 +12,51 @@ import java.util.List;
 import kr.ac.sungkyul.emaillist.vo.EmailListVo;
 
 public class EmailListDao {
+	
+	public boolean insert( EmailListVo vo ) {
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		int count = 0;
+		
+		try {
+			Class.forName( "oracle.jdbc.driver.OracleDriver" );
+			
+			String url = "jdbc:oracle:thin:@localhost:1521:xe";
+			conn = DriverManager.getConnection(url, "webdb", "webdb");
+			
+			String sql = 
+" insert into emaillist values(seq_emaillist.nextval, ?, ?, ?, sysdate)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString( 1, vo.getLastName() );
+			pstmt.setString( 2, vo.getFirstName() );
+			pstmt.setString( 3, vo.getEmail() );
+			
+			count = pstmt.executeUpdate();
+			
+		} catch( ClassNotFoundException e ) {
+			e.printStackTrace();
+			return false;
+		} catch( SQLException e ) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				if( pstmt != null ) {
+					pstmt.close();
+				}
+				if( conn != null ) {
+					conn.close();
+				}
+			} catch( SQLException e ) {
+				e.printStackTrace();
+				return false;
+			}
+		}		
+		
+		return (count == 1);
+	}
 	
 	public List<EmailListVo> getList() {
 		List<EmailListVo> list = new ArrayList<EmailListVo>();
